@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import { InteractionStatus } from "@azure/msal-browser";
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
+import { loginRequest } from "./authConfig";
 import { ProductForm } from "./components/ProductForm";
 import { ProductTable } from "./components/ProductTable";
 import { productService } from "./services/productService";
@@ -7,6 +10,29 @@ import type { Product, ProductInput } from "./types/product";
 import "./styles.css";
 
 export default function App() {
+  const isAuthenticated = useIsAuthenticated();
+  const { accounts, inProgress, instance } = useMsal();
+
+  if (inProgress !== InteractionStatus.None) {
+    return <main className="auth-page"><p>Completing Microsoft Entra sign-in…</p></main>;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <main className="auth-page">
+        <section className="auth-card">
+          <h1>Azure React CRUD Demo</h1>
+          <p>Sign in with your organization account to manage products.</p>
+          <button onClick={() => void instance.loginRedirect(loginRequest)}>Sign in with Microsoft</button>
+        </section>
+      </main>
+    );
+  }
+
+  return <ProductApplication userName={accounts[0]?.name ?? accounts[0]?.username ?? "Signed-in user"} onSignOut={() => void instance.logoutRedirect()} />;
+}
+
+function ProductApplication({ userName, onSignOut }: { userName: string; onSignOut: () => void }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -56,14 +82,18 @@ export default function App() {
           <h1>Products</h1>
           <p>Azure React CRUD Demo</p>
         </div>
-        <button
-          onClick={() => {
-            setSuccess("");
-            setEditing(null);
-          }}
-        >
-          Add product
-        </button>
+        <div className="header-actions">
+          <span className="user-name">{userName}</span>
+          <button
+            onClick={() => {
+              setSuccess("");
+              setEditing(null);
+            }}
+          >
+            Add product
+          </button>
+          <button className="secondary" onClick={onSignOut}>Sign out</button>
+        </div>
       </header>
       {success && <p className="message success">{success}</p>}
       {error && <p className="message error">{error}</p>}
