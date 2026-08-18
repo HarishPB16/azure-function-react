@@ -10,6 +10,8 @@ The React app is configured for your Microsoft Entra ID application:
 
 The client and tenant IDs are public identifiers. Do not create or put a client secret in this React app; a browser-based SPA cannot keep a secret safe.
 
+`frontend/.env.production` explicitly configures the deployed redirect URL as `https://ashy-rock-03137bd00.7.azurestaticapps.net`. Vite includes this value whenever you run `npm run build`.
+
 ## 1. Add the local redirect URI
 
 1. Open [Microsoft Entra admin center](https://entra.microsoft.com/).
@@ -24,18 +26,18 @@ The client and tenant IDs are public identifiers. Do not create or put a client 
 
 6. Select **Configure** or **Save**.
 
-## 2. Add the Azure Blob Storage redirect URI
+## 2. Add the production redirect URI
 
 1. In the same **Authentication** page, select **Add URI** under the **Single-page application** platform.
-2. Add the Static Website endpoint of your Storage account exactly. It looks like this:
+2. Add the production Azure Static Web Apps URL exactly:
 
    ```text
-   https://YOUR-STORAGE-ACCOUNT.z##.web.core.windows.net
+   https://ashy-rock-03137bd00.7.azurestaticapps.net
    ```
 
 3. Select **Save**.
 
-Use the **Static website primary endpoint** from **Storage account -> Data management -> Static website**. Do not use a `blob.core.windows.net` URL, because that is not the React website origin.
+The app uses this URL automatically as its redirect and post-logout URL. Do not use a `blob.core.windows.net` URL, because it is not the React website origin.
 
 ## 3. Confirm the Entra application configuration
 
@@ -82,7 +84,7 @@ Use the **Static website primary endpoint** from **Storage account -> Data manag
 2. Upload `frontend/dist` using Step 6 of [the Blob Storage deployment guide](REACT-AZURE-BLOB-STORAGE-DEPLOYMENT.md).
 3. Open the Blob Storage static website URL and select **Sign in with Microsoft**.
 
-**Check:** Entra ID redirects back to the Blob Storage site, where the Products page is shown.
+**Check:** Entra ID redirects back to `https://ashy-rock-03137bd00.7.azurestaticapps.net`, where the Products page is shown.
 
 ## Important API security note
 
